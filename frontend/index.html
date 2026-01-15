@@ -251,48 +251,68 @@
     science: { title: "Kalam Science College", desc: "Junior college block for foundational science studies.", tags: ["Science", "Education"] }
   };
 
-    document.addEventListener('DOMContentLoaded', function() {
-      const eventsList = document.getElementById('eventsList');
-      const busTable = document.getElementById('busTable');
-      const API_BASE = 'http://localhost:5000/api';
+    document.addEventListener("DOMContentLoaded", function () {
+  const eventsList = document.getElementById("eventsList");
+  const busTable = document.getElementById("busTable");
 
-      async function loadData() {
-        try {
-          // Events
-          const eventsResponse = await fetch(`${API_BASE}/events`);
-          const events = await eventsResponse.json();
-          eventsList.innerHTML = events.length ? 
-            events.map(event => `
+  const API_BASE = "https://smart-campus-assistant-ixrp.onrender.com/api";
+
+  async function loadData() {
+    try {
+      // EVENTS
+      const eventsResponse = await fetch(`${API_BASE}/events`);
+      const events = await eventsResponse.json();
+
+      eventsList.innerHTML = events.length
+        ? events
+            .map(
+              event => `
               <li>
                 <strong>${event.title}</strong><br>
-                <small>${new Date(event.date).toLocaleDateString('en-IN')} • ${event.type?.toUpperCase()}</small>
+                <small>
+                  ${new Date(event.date).toLocaleDateString("en-IN")}
+                  • ${event.type?.toUpperCase()}
+                </small>
               </li>
-            `).join('') : 
-            '<li class="no-data">🎉 No upcoming events</li>';
+            `
+            )
+            .join("")
+        : '<li class="no-data">🎉 No upcoming events</li>';
 
-          // Buses
-          const busesResponse = await fetch(`${API_BASE}/buses`);
-          const buses = await busesResponse.json();
-          const tbody = busTable.querySelector('tbody');
-          tbody.innerHTML = buses.length ? 
-            buses.map(bus => `
+      // BUSES
+      const busesResponse = await fetch(`${API_BASE}/buses`);
+      const buses = await busesResponse.json();
+      const tbody = busTable.querySelector("tbody");
+
+      tbody.innerHTML = buses.length
+        ? buses
+            .map(
+              bus => `
               <tr>
-                <td><strong>${bus.route}</strong><br><small>${bus.busNumber}</small></td>
-                <td>${bus.timings.join('<br>')}</td>
-                <td>${bus.points.join(' → ')}</td>
+                <td>
+                  <strong>${bus.route}</strong><br>
+                  <small>${bus.busNumber || ""}</small>
+                </td>
+                <td>${bus.timings.join("<br>")}</td>
+                <td>${bus.points.join(" → ")}</td>
               </tr>
-            `).join('') : 
-            '<tr><td colspan="3" class="no-data">🚌 No buses scheduled</td></tr>';
-        } catch (error) {
-          eventsList.innerHTML = '<li class="no-data">⚠️ Cannot load events</li>';
-          busTable.querySelector('tbody').innerHTML = '<tr><td colspan="3" class="no-data">⚠️ Cannot load buses</td></tr>';
-        }
-      }
+            `
+            )
+            .join("")
+        : '<tr><td colspan="3" class="no-data">🚌 No buses scheduled</td></tr>';
+    } catch (error) {
+      console.error(error);
+      eventsList.innerHTML =
+        '<li class="no-data">⚠️ Cannot load events</li>';
+      busTable.querySelector("tbody").innerHTML =
+        '<tr><td colspan="3" class="no-data">⚠️ Cannot load buses</td></tr>';
+    }
+  }
 
-      // Load data immediately and refresh every 30s
-      loadData();
-      setInterval(loadData, 30000);
-    });
+  loadData();
+  setInterval(loadData, 30000);
+});
+
   </script>
 </body>
 </html>
