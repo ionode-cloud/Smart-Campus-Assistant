@@ -8,7 +8,7 @@
         :root {
       --primary: #1e3c72;
       --secondary: #f39c12;
-      --accent: #27ae60; /* The green from your video/image */
+      --accent: #27ae60; 
       --bg: #f4f7f6;
     }
 
@@ -19,11 +19,9 @@
       display: grid;
       grid-template-columns: 1fr;
       gap: 20px;
-      /* max-width: 1400px; */
       margin: 0 auto;
     }
 
-    /* Map Container */
     .map-wrapper {
       position: relative;
       background: white;
@@ -35,14 +33,12 @@
 
     #campusImg { width: 100%; height: 95vh; display: block; }
 
-    /* Hover Hotspots */
     .hotspot {
       position: absolute;
       cursor: pointer;
       z-index: 10;
     }
 
-    /* The Hover Label (Tooltip) */
     .hotspot::after {
       content: attr(data-label);
       position: absolute;
@@ -61,7 +57,6 @@
       box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     }
 
-    /* The Little Triangle under the label */
     .hotspot::before {
       content: '';
       position: absolute;
@@ -80,14 +75,12 @@
       transform: translateX(-50%) scale(1);
     }
 
-    /* Active Selection Highlight */
     .hotspot:hover {
       background: rgba(39, 174, 96, 0.2);
       border: 2px solid var(--accent);
       border-radius: 8px;
     }
 
-    /* Info Side Panel */
     .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
     .tag { display: inline-block; padding: 4px 10px; background: #eee; border-radius: 15px; font-size: 12px; margin: 5px 5px 0 0; }
 
@@ -187,6 +180,34 @@
       h1 { font-size: 2em; }
       body { padding: 15px; }
     }
+    .hotspot::after {
+  content: attr(data-label) "\A" attr(data-desc);
+  white-space: pre-line;
+  position: absolute;
+  top: -65px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.9);
+  background: var(--accent);
+  color: white;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+  max-width: 300px;
+  max-height: 200px;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+}
+
+.hotspot:hover::after,
+.hotspot:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
   </style>
 </head>
 <body>
@@ -198,17 +219,75 @@
     <div class="dashboard">
   <div class="map-wrapper">
     <img src="./image.png" id="campusImg" alt="Campus Map">
-    
-    <div class="hotspot" data-label="Block C (Nursing)" style="left:5%; top:21%; width:18%; height:13%;" onclick="updateUI('nursing')"></div>
-    <div class="hotspot" data-label="Block B (Diploma)" style="left:39%; top:35%; width:25%; height:18%;" onclick="updateUI('diploma')"></div>
-    <div class="hotspot" data-label="Block A (B.Tech)" style="left:5%; top:45%; width:18%; height:18%;" onclick="updateUI('btech')"></div>
-    <div class="hotspot" data-label="Girls Hostel" style="left:6%; top:75%; width:15%; height:18%;" onclick="updateUI('girls_hostel')"></div>
-    <div class="hotspot" data-label="Boys Hostel" style="left:65%; top:10%; width:15%; height:18%;" onclick="updateUI('boys_hostel')"></div>
-    <div class="hotspot" data-label="Sports Ground" style="left:23%; top:3%; width:38%; height:25%;" onclick="updateUI('ground')"></div>
-    <div class="hotspot" data-label="Canteen" style="left:83%; top:53%; width:20%; height:13%;" onclick="updateUI('canteen')"></div>
-    <div class="hotspot" data-label="Transport Hub" style="left:63%; top:65%; width:18%; height:20%;" onclick="updateUI('bus')"></div>
-    <div class="hotspot" data-label="Kalam Jr. Science" style="left:85%; top:3%; width:15%; height:13%;" onclick="updateUI('science')"></div>
-    <div class="hotspot" data-label="Main Gate" style="left:23%; top:90%; width:22%; height:10%;" onclick="updateUI('girls_hostel')"></div>
+    <div class="hotspot"
+     data-label="Block C (Nursing)"
+     data-desc="Primary academic building for Nursing and Medical Sciences."
+     style="left:5%; top:21%; width:18%; height:13%;"
+     onclick="updateUI('nursing')">
+</div>
+
+<div class="hotspot"
+     data-label="Block B (Diploma)"
+     data-desc="Central hub for diploma courses, labs, and practical training."
+     style="left:39%; top:35%; width:25%; height:18%;"
+     onclick="updateUI('diploma')">
+</div>
+
+<div class="hotspot"
+     data-label="Block A (B.Tech)"
+     data-desc="Main engineering block with classrooms, labs, and admin offices."
+     style="left:5%; top:45%; width:18%; height:18%;"
+     onclick="updateUI('btech')">
+</div>
+
+<div class="hotspot"
+     data-label="Girls Hostel"
+     data-desc="Secure residential facility for female students with 24/7 security."
+     style="left:6%; top:75%; width:15%; height:18%;"
+     onclick="updateUI('girls_hostel')">
+</div>
+
+<div class="hotspot"
+     data-label="Boys Hostel"
+     data-desc="Student residence for boys located near sports and recreation areas."
+     style="left:65%; top:10%; width:15%; height:18%;"
+     onclick="updateUI('boys_hostel')">
+</div>
+
+<div class="hotspot"
+     data-label="Sports Ground"
+     data-desc="Large open ground for cricket, football, athletics, and events."
+     style="left:23%; top:8%; width:38%; height:25%;"
+     onclick="updateUI('ground')">
+</div>
+
+<div class="hotspot"
+     data-label="Canteen"
+     data-desc="Central dining area serving breakfast, lunch, snacks, and beverages."
+     style="left:83%; top:53%; width:20%; height:13%;"
+     onclick="updateUI('canteen')">
+</div>
+
+<div class="hotspot"
+     data-label="Transport Hub"
+     data-desc="Pickup and drop point for campus and city transport services."
+     style="left:63%; top:65%; width:18%; height:20%;"
+     onclick="updateUI('bus')">
+</div>
+
+<div class="hotspot"
+     data-label="Kalam Jr. Science"
+     data-desc="Junior college block focused on foundational science education."
+     style="left:85%; top:3%; width:15%; height:13%;"
+     onclick="updateUI('science')">
+</div>
+
+<div class="hotspot"
+     data-label="Main Gate"
+     data-desc="Primary entrance with security checkpoint and visitor access."
+     style="left:23%; top:90%; width:22%; height:10%;"
+     onclick="updateUI('girls_hostel')">
+</div>
   </div>
 </div>
 
@@ -238,19 +317,6 @@
   </div>
 
   <script>
-
-     const campusData = {
-    nursing: { title: "Block C (Nursing)", desc: "Primary academic building for Nursing and Medical Sciences.", tags: ["Labs", "Faculty"] },
-    diploma: { title: "Block B (Diploma)", desc: "Central hub for technical diploma courses and workshops.", tags: ["Workshops", "Tech"] },
-    btech: { title: "Block A (B.Tech)", desc: "Main Engineering block and administrative headquarters.", tags: ["Admin", "B.Tech"] },
-    girls_hostel: { title: "Girls Hostel", desc: "Residential area for female students with 24/7 security.", tags: ["Safe", "Home"] },
-    boys_hostel: { title: "Boys Hostel", desc: "Male student residence located near the sports complex.", tags: ["Gym", "Home"] },
-    ground: { title: "Sports Ground", desc: "Main field for cricket, football, and outdoor events.", tags: ["Sports", "Active"] },
-    canteen: { title: "Campus Canteen", desc: "Central dining area serving breakfast, lunch, and snacks.", tags: ["Food", "Chai"] },
-    bus: { title: "Bus Area", desc: "Pick-up and drop-off point for all campus shuttle routes.", tags: ["Travel", "Bus"] },
-    science: { title: "Kalam Science College", desc: "Junior college block for foundational science studies.", tags: ["Science", "Education"] }
-  };
-
     document.addEventListener("DOMContentLoaded", function () {
   const eventsList = document.getElementById("eventsList");
   const busTable = document.getElementById("busTable");
