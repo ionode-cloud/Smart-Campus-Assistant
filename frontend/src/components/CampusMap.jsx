@@ -4,7 +4,7 @@ import { pathNodes } from './pathNodes';
 import { HumanWalkingSVG } from './HumanWalkingSVG';
 import { ZoomIn, ZoomOut, RotateCw, Maximize2 } from 'lucide-react';
 
-const campusMapImage = '/src/assets/v7.png';
+import campusMapImage from '../assets/v7.png';
 
 const hotspots = [
   { id: 'block-a', x: 16.3, y: 42, width: 6, height: 15, name: 'Block A' },
@@ -138,7 +138,7 @@ export function CampusMap({ selectedLocation, onLocationClick, collapsed, onTogg
             )}
           </div>
 
-          <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl">
+          <div className="relative  w-full h-full rounded-2xl overflow-hidden shadow-2xl">
             <div
               style={{
                 transform: `scale(${zoom}) rotate(${rotation}deg)`,
