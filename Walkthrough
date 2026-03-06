@@ -1,0 +1,120 @@
+# Smart Campus Assistant – Walkthrough
+
+## What Was Built
+
+### Backend (`backend/`)
+Complete Node.js + Express + MongoDB REST API with two resource groups.
+
+**Directory structure:**
+```
+backend/
+├── config/
+│   └── db.js              ← MongoDB connection
+├── controllers/
+│   ├── busController.js   ← Bus CRUD logic
+│   └── locationController.js ← Location CRUD logic
+├── models/
+│   ├── Bus.js             ← Bus schema
+│   ├── Location.js        ← Campus location schema
+│   └── Route.js           ← Route schema
+├── routes/
+│   ├── busRoutes.js       ← /api/buses
+│   └── locationRoutes.js  ← /api/locations
+├── .env                   ← PORT, MONGO_URI
+├── package.json
+├── seed.js                ← Seeds 15 locations + 5 buses
+└── server.js              ← Express entry point
+```
+
+### Frontend Changes
+| File | Change |
+|------|--------|
+| `src/services/busService.js` | New – axios bus API layer |
+| `src/services/locationService.js` | New – axios location API layer |
+| `src/components/BusTiming.jsx` | New – Bus Timing modal with table |
+| `src/App.jsx` | Fetches locations from API, manages bus timing state |
+| `src/components/CampusMap.jsx` | Bus Timing button, solid route lines |
+| `src/components/HumanWalkingSVG.jsx` | Improved 8-phase realistic walking human |
+
+---
+
+## API Endpoints
+
+### Buses `(/api/buses)`
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/buses` | Get all buses |
+| POST | `/api/buses` | Add new bus |
+| GET | `/api/buses/:id` | Get bus by ID |
+| PUT | `/api/buses/:id` | Update bus |
+| DELETE | `/api/buses/:id` | Delete bus |
+
+### Locations `(/api/locations)`
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/locations` | Get all 15 campus locations |
+| POST | `/api/locations` | Add new location |
+| GET | `/api/locations/:id` | Get by locationId slug (e.g. `block-a`) |
+| PUT | `/api/locations/:id` | Update location |
+| DELETE | `/api/locations/:id` | Delete location |
+
+> **Tip:** `GET /api/locations?type=academic` filters by type.
+
+---
+
+## How to Run
+
+### 1. Start MongoDB
+Make sure MongoDB is running locally on port `27017`.
+
+### 2. Start Backend
+```bash
+cd backend
+npm run dev
+# → Server on http://localhost:5000
+```
+
+### 3. Seed the Database (first time only)
+```bash
+cd backend
+npm run seed
+# → Seeds 15 campus locations + 5 sample buses
+```
+
+### 4. Start Frontend
+```bash
+cd frontend
+npm run dev
+# → App on http://localhost:5173
+```
+
+---
+
+## UI Features
+- **Bus Timing button** (top-left of map) → opens modal with live bus table
+- **Solid route line** (green, continuous) replaces old yellow dotted path
+- **Improved walking human** with 8-phase walk cycle, knees, eyes, shadow
+- **Graceful fallback** — if backend is offline, static location data is used
+
+---
+
+## Postman – Sample POST /api/buses Body
+```json
+{
+  "busName": "Campus Bus 6",
+  "busNumber": "OD-01-AB-1006",
+  "startLocation": "College Campus",
+  "destination": "City Bus Stand",
+  "stops": ["Main Gate", "Gate 2", "Bus Stand"],
+  "departureTime": "12:00 PM",
+  "arrivalTime": "12:40 PM",
+  "routePath": [
+    { "lat": 20.2961, "lng": 85.8245 },
+    { "lat": 20.3001, "lng": 85.8285 }
+  ]
+}
+```
+
+## Validation ✅
+- Frontend build: **0 errors**, 1657 modules in 8s
+- Backend install: **0 errors**, 119 packages

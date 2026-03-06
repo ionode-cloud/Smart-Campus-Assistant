@@ -1,112 +1,42 @@
-require("dotenv").config();
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const connectDB = require('./config/db');
+
+const busRoutes = require('./routes/busRoutes');
+const locationRoutes = require('./routes/locationRoutes');
+
+// Connect to MongoDB
+connectDB();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-const MONGODB_URI = process.env.MONGODB_URI;
-
+// Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-mongoose
-  .connect(MONGODB_URI)
-  .then(() => console.log(" MongoDB Connected"))
-  .catch(err => console.error(" MongoDB error:", err.message));
+// Routes
+app.use('/api/buses', busRoutes);
+app.use('/api/locations', locationRoutes);
 
-const eventSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  date: { type: Date, required: true },
-  type: {
-    type: String,
-    enum: ["exam", "event", "workshop", "holiday"]
-  },
-  description: String
+// Health check
+app.get('/', (req, res) => {
+    res.json({ message: '🚀 Smart Campus Assistant API is running', version: '1.0.0' });
 });
 
-const busSchema = new mongoose.Schema({
-  route: { type: String, required: true },
-  busNumber: String,
-  timings: [String],
-  points: [String],
-  type: { type: String, enum: ["morning", "evening"] }
+// 404 handler
+app.use((req, res) => {
+    res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
 });
 
-const Event = mongoose.model("Event", eventSchema);
-const Bus = mongoose.model("Bus", busSchema);
-
-async function seedData() {
-  try {
-    if (await Event.countDocuments() === 0) {
-      await Event.insertMany([
-        { title: "Mid Semester Exam", date: "2026-02-01", type: "exam" },
-        { title: "Tech Fest 2026", date: "2026-03-15", type: "event" },
-        { title: "AI Workshop", date: "2026-01-25", type: "workshop" }
-      ]);
-    }
-
-    if (await Bus.countDocuments() === 0) {
-      await Bus.insertMany([
-        {
-          route: "City Center",
-          busNumber: "MH-01-C01",
-          timings: ["07:45 AM", "08:15 AM", "05:30 PM"],
-          points: ["Main Gate", "Hostel", "City Center"]
-        },
-        {
-          route: "Railway Station",
-          busNumber: "MH-01-C02",
-          timings: ["08:00 AM", "04:45 PM", "06:00 PM"],
-          points: ["Main Gate", "Station"]
-        }
-      ]);
-    }
-
-    console.log(" Seed data ready");
-  } catch (err) {
-    console.error("Seed error:", err.message);
-  }
-}
-
-app.get("/", (req, res) => {
-  res.json({
-    status: "OK",
-    message: "Smart Campus Backend Running 🚀"
-  });
+// Global error handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ success: false, message: err.message || 'Internal Server Error' });
 });
 
-// Events API
-app.get("/api/events", async (req, res) => {
-  try {
-    const events = await Event.find({
-      date: { $gte: new Date() }
-    })
-      .sort({ date: 1 })
-      .limit(5)
-      .lean();
-
-    res.json(events);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch events" });
-  }
-});
-
-// Buses API
-app.get("/api/buses", async (req, res) => {
-  try {
-    const buses = await Bus.find()
-      .sort({ route: 1 })
-      .lean();
-
-    res.json(buses);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch buses" });
-  }
-});
-
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(` Server running on port ${PORT}`);
-  setTimeout(seedData, 1000);
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
 });

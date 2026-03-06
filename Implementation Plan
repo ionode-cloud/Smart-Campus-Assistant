@@ -1,0 +1,141 @@
+# Smart Campus Assistant – Backend & Frontend Integration
+
+## Background
+
+The existing frontend is a **React + Vite** campus map application. It shows buildings, animates a walking human icon along paths, and has a sidebar for location details. The goal is to:
+1. Build a full Node.js/Express/MongoDB backend with REST APIs for bus data
+2. Integrate the frontend to fetch and display bus timing from the API
+3. UI improvements: solid route lines, improved walking human icon, Bus Timing button
+
+---
+
+## Proposed Changes
+
+### Backend (new directory: `backend/`)
+
+#### [NEW] `backend/package.json`
+Node.js project with deps: `express`, `mongoose`, `cors`, `dotenv`
+
+#### [NEW] `backend/.env`
+```
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/smart_campus
+```
+
+#### [NEW] `backend/server.js`
+- Express app entry point
+- CORS enabled
+- Body parser for JSON
+- Mounts `/api/buses` routes
+- Connects to MongoDB via `config/db.js`
+
+#### [NEW] `backend/config/db.js`
+- Mongoose connect function using `MONGO_URI` from env
+
+#### [NEW] `backend/models/Bus.js`
+Mongoose schema with:
+- `busName`, `busNumber`, `startLocation`, `destination`
+- `stops` (array of strings)
+- `departureTime`, `arrivalTime`
+- `routePath` (array of `{ lat, lng }`)
+
+#### [NEW] `backend/models/Route.js`
+Mongoose schema for route metadata (optional extension for future use):
+- `routeName`, `stops`, `pathCoordinates`
+
+#### [NEW] `backend/models/Location.js`
+Mongoose schema for campus locations:
+- `id` (unique string slug, e.g. `block-a`)
+- `name`, `description`, `type`
+- `departments` (array of strings, optional)
+- `timings` (optional string)
+
+#### [NEW] `backend/controllers/busController.js`
+CRUD handlers:
+- `getAllBuses` – GET `/api/buses`
+- `createBus` – POST `/api/buses`
+- `getBusById` – GET `/api/buses/:id`
+- `updateBus` – PUT `/api/buses/:id`
+- `deleteBus` – DELETE `/api/buses/:id`
+
+#### [NEW] `backend/controllers/locationController.js`
+CRUD handlers:
+- `getAllLocations` – GET `/api/locations`
+- `createLocation` – POST `/api/locations`
+- `getLocationById` – GET `/api/locations/:id`
+- `updateLocation` – PUT `/api/locations/:id`
+- `deleteLocation` – DELETE `/api/locations/:id`
+
+#### [NEW] `backend/routes/busRoutes.js`
+Express Router for bus endpoints
+
+#### [NEW] `backend/routes/locationRoutes.js`
+Express Router for location endpoints
+
+#### [NEW] `backend/seed.js`
+Script to insert all 15 campus locations + sample bus records into MongoDB
+
+---
+
+### Frontend Changes
+
+#### [NEW] `frontend/src/services/busService.js`
+Axios-based API service for `GET /api/buses`, etc.
+
+#### [NEW] `frontend/src/services/locationService.js`
+Axios-based API service for `GET /api/locations`, etc.
+
+#### [MODIFY] `frontend/src/App.jsx`
+- Add state: `buses`, `showBusTiming`
+- **Remove hardcoded `campusLocations` array** — fetch from `GET /api/locations` on mount
+- Fetch buses from API on mount via `busService`
+
+#### [NEW] `frontend/src/components/BusTiming.jsx`
+- Modal/panel with a table: Bus Name | From | To | Departure | Arrival
+- Fetches from `/api/buses`
+- Shown/hidden by the "Bus Timing" button
+
+#### [MODIFY] `frontend/src/components/CampusMap.jsx`
+1. **Bus Timing button** – top-left corner, opens the BusTiming panel
+2. **Solid route line** – replace `strokeDasharray="0.1,2.2"` with a solid stroke (no dash), giving a continuous connected path
+3. **Improved HumanWalkingSVG** – pass a more detailed/realistic SVG
+
+#### [MODIFY] `frontend/src/components/HumanWalkingSVG.jsx`
+Replace the basic rectangle-based stick figure with a more realistic walking human SVG that has proper body shape, head, torso, arms and legs with smoother animation.
+
+---
+
+## Verification Plan
+
+### Automated / Postman Tests
+
+**Campus Locations API:**
+- `GET http://localhost:5000/api/locations` → returns all 15 locations
+- `POST http://localhost:5000/api/locations` → create new location
+- `GET http://localhost:5000/api/locations/:id` → get single location
+- `PUT http://localhost:5000/api/locations/:id` → update location
+- `DELETE http://localhost:5000/api/locations/:id` → delete location
+
+**Bus API:**
+1. Start backend:
+   ```bash
+   cd backend
+   npm install
+   npm run dev
+   ```
+2. Verify MongoDB connection (console log: `MongoDB connected`)
+3. Run seed script: `node seed.js`
+4. Use Postman to test all endpoints:
+   - `GET http://localhost:5000/api/buses` → returns array of buses
+   - `POST http://localhost:5000/api/buses` → body JSON with bus fields → returns created bus
+   - `GET http://localhost:5000/api/buses/:id` → returns single bus
+   - `PUT http://localhost:5000/api/buses/:id` → updates and returns bus
+   - `DELETE http://localhost:5000/api/buses/:id` → deletes bus
+
+### Frontend Manual Verification
+1. Start frontend: `cd frontend && npm run dev`
+2. Open browser at `http://localhost:5173`
+3. **Bus Timing button** should appear top-left of the map
+4. Clicking it should open a modal/panel listing all buses from the API (table with Bus Name, From, To, Time)
+5. Select a campus location → navigation path should appear as a **solid continuous line** (not dotted)
+6. Walking human icon should animate along the solid path with improved realistic look
