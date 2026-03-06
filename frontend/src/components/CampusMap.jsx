@@ -381,31 +381,7 @@ export function CampusMap({ selectedLocation, onLocationClick, collapsed, onTogg
                   // Hot highlighting: add animated glowing border on hover/selected
                   return (
                     <g key={hotspot.id}>
-                      {/* Glow effect for hover or selected (thinner border) */}
-                      {(isHovered || isSelected) && (
-                        <rect
-                          x={hotspot.x - 0.3}
-                          y={hotspot.y - 0.3}
-                          width={hotspot.width + 0.6}
-                          height={hotspot.height + 0.6}
-                          rx="2"
-                          fill="none"
-                          stroke={isSelected ? '#2563eb' : '#facc15'}
-                          strokeWidth="1.1"
-                          style={{
-                            filter: `drop-shadow(0 0 6px ${isSelected ? '#2563eb' : '#facc15'}) drop-shadow(0 0 12px ${isSelected ? '#2563eb' : '#fde047'})`,
-                            opacity: 0.7,
-                            transition: 'filter 0.3s, opacity 0.3s',
-                          }}
-                        >
-                          <animate
-                            attributeName="opacity"
-                            values="0.7;1;0.7"
-                            dur="1.2s"
-                            repeatCount="indefinite"
-                          />
-                        </rect>
-                      )}
+                      {/* Invisible clickable layer removed the blue/yellow glow */}
                       <rect
                         x={hotspot.x}
                         y={hotspot.y}
