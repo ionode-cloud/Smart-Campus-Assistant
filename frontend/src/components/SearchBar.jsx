@@ -9,6 +9,32 @@ export function SearchBar({ onSearch }) {
   const [error, setError] = useState(null);
   const popupRef = useRef(null);
 
+  // Fallback data for offline backend
+  const fallbackBuses = [
+    {
+      _id: '1',
+      busName: 'Campus Bus 1',
+      busNumber: 'OD-01-AB-1001',
+      startLocation: 'College Campus',
+      destination: 'City Center',
+      stops: ['Main Gate', 'Bus Stand', 'Market Square', 'City Center'],
+      departureTime: '9:00 AM',
+      arrivalTime: '9:45 AM',
+      routePath: [{ lat: 20.2961, lng: 85.8245 }]
+    },
+    {
+      _id: '2',
+      busName: 'Campus Bus 2',
+      busNumber: 'OD-01-AB-1002',
+      startLocation: 'College Campus',
+      destination: 'Railway Station',
+      stops: ['Main Gate', 'Gate 2', 'Overbridge', 'Railway Station'],
+      departureTime: '10:30 AM',
+      arrivalTime: '11:15 AM',
+      routePath: [{ lat: 20.2961, lng: 85.8245 }]
+    }
+  ];
+
   // Fetch buses when popup opens for the first time
   useEffect(() => {
     if (!open || buses.length > 0) return;
@@ -17,9 +43,16 @@ export function SearchBar({ onSearch }) {
       setError(null);
       try {
         const data = await getAllBuses();
-        setBuses(data);
+        if (data && data.length > 0) {
+          setBuses(data);
+        } else {
+          setBuses(fallbackBuses);
+        }
       } catch {
-        setError('Could not load bus data. Is the backend running?');
+        // Use fallback static data silently
+        console.warn("Backend offline, using fallback bus data in SearchBar.");
+        setBuses(fallbackBuses);
+        setError('Using offline bus schedule while backend sleeps.');
       } finally {
         setLoading(false);
       }
@@ -40,27 +73,30 @@ export function SearchBar({ onSearch }) {
   }, [open]);
 
   return (
-    <div className="relative " ref={popupRef}>
+    <div className="relative " style={{ marginLeft: "320px" }} ref={popupRef}>
       {/* ── Bus Schedule Toggle Button ── */}
       <button
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 active:scale-95 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl outline-none focus:outline-none"
+        className="group flex items-center gap-2 bg-gradient-to-r from-green-500 via-emerald-500 to-green-600 hover:from-green-400 hover:via-emerald-400 hover:to-green-500 active:scale-95 text-white font-bold text-sm px-6 py-3 rounded-full shadow-[0_8px_15px_-3px_rgba(16,185,129,0.4)] transition-all duration-300 hover:shadow-[0_15px_25px_-5px_rgba(16,185,129,0.6)] hover:-translate-y-1 outline-none focus:outline-none border border-green-400/30 overflow-hidden relative"
         title="Bus Schedule"
       >
-        <Bus className="w-4 h-4" />
-        Bus Schedule
-        <span className={`ml-1 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>▾</span>
+        {/* Shine effect overlay */}
+        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-[150%] animate-[shine_3s_infinite_ease-in-out]"></span>
+
+        <Bus className="w-5 h-5 group-hover:animate-bounce" />
+        <span className="relative z-10 tracking-wide text-[15px]">Bus Schedule</span>
+        <span className={`ml-1 transition-transform duration-300 relative z-10 ${open ? 'rotate-180' : 'group-hover:translate-y-0.5'}`}>▾</span>
       </button>
 
       {/* ── Popup Dropdown ── */}
       {open && (
         <div
           className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[500px] max-w-[95vw] bg-white rounded-2xl shadow-2xl z-50 overflow-hidden border border-gray-100"
-          style={{ animation: 'fadeSlideDown 0.18s ease-out' }}
+          style={{ animation: 'fadeSlideDown 0.18s ease-out', marginLeft: "200px" }}
         >
           {/* Header */}
           <div className="bg-gradient-to-r from-green-600 to-emerald-500 px-5 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div style={{ marginLeft: "200px" }} className="flex items-center gap-2">
               <Bus className="w-4 h-4 text-white" />
               <span className="text-white font-bold text-sm">Bus Schedule</span>
             </div>
@@ -73,7 +109,7 @@ export function SearchBar({ onSearch }) {
           </div>
 
           {/* Body */}
-          <div className="max-h-[500px] overflow-y-auto p-4 space-y-3">
+          <div style={{ width: "500px" }} className="max-h-[500px] overflow-y-auto p-4 space-y-3">
             {loading && (
               <div className="flex flex-col items-center py-10 gap-2">
                 <Loader2 className="w-8 h-8 text-green-500 animate-spin" />
@@ -82,20 +118,20 @@ export function SearchBar({ onSearch }) {
             )}
 
             {error && (
-              <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl p-3">
-                <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-                <p className="text-red-600 text-xs">{error}</p>
+              <div className="flex items-start gap-2 bg-yellow-50 border border-yellow-200 rounded-xl p-3">
+                <AlertCircle className="w-4 h-4 text-yellow-500 flex-shrink-0 mt-0.5" />
+                <p className="text-yellow-700 text-xs font-medium">{error}</p>
               </div>
             )}
 
-            {!loading && !error && buses.length === 0 && (
+            {!loading && buses.length === 0 && (
               <div className="text-center py-8">
                 <Bus className="w-10 h-10 text-gray-200 mx-auto mb-2" />
                 <p className="text-gray-400 text-xs">No buses found.</p>
               </div>
             )}
 
-            {!loading && !error && buses.map((bus, i) => (
+            {!loading && buses.map((bus, i) => (
               <div
                 key={bus._id || i}
                 className="bg-gray-50 hover:bg-green-50 rounded-xl p-3 transition-colors border border-transparent hover:border-green-200"
@@ -140,6 +176,11 @@ export function SearchBar({ onSearch }) {
         @keyframes fadeSlideDown {
           from { opacity: 0; transform: translateY(-6px); }
           to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shine {
+          0% { transform: translateX(-150%) skewX(-15deg); }
+          50% { transform: translateX(150%) skewX(-15deg); }
+          100% { transform: translateX(150%) skewX(-15deg); }
         }
       `}</style>
     </div>

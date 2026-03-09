@@ -79,7 +79,7 @@ export default function App() {
       </div>
 
       {/* Floating Bus Button */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[9999] pointer-events-auto">
+      <div className={`absolute top-4 z-[9999] pointer-events-auto transition-all duration-300 ${sidebarCollapsed ? 'left-4' : 'left-0 ml-[320px]'}`}>
         <SearchBar />
       </div>
     </div>
