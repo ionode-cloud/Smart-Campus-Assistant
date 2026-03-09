@@ -3,7 +3,60 @@ import { X, Bus, Clock, MapPin, AlertCircle, Loader2 } from 'lucide-react';
 import { getAllBuses } from '../services/busService';
 
 export function BusTiming({ onClose }) {
-    const [buses, setBuses] = useState([]);
+    const fallbackBuses = [
+        {
+            _id: '1',
+            busName: 'Campus Bus 1',
+            busNumber: 'OD-01-AB-1001',
+            startLocation: 'College Campus',
+            destination: 'City Center',
+            stops: ['Main Gate', 'Bus Stand', 'Market Square', 'City Center'],
+            departureTime: '9:00 AM',
+            arrivalTime: '9:45 AM'
+        },
+        {
+            _id: '2',
+            busName: 'Campus Bus 2',
+            busNumber: 'OD-01-AB-1002',
+            startLocation: 'College Campus',
+            destination: 'Railway Station',
+            stops: ['Main Gate', 'Gate 2', 'Overbridge', 'Railway Station'],
+            departureTime: '10:30 AM',
+            arrivalTime: '11:15 AM'
+        },
+        {
+            _id: '3',
+            busName: 'Campus Bus 3',
+            busNumber: 'OD-01-AB-1003',
+            startLocation: 'City Center',
+            destination: 'College Campus',
+            stops: ['City Center', 'Market Square', 'Bus Stand', 'Main Gate'],
+            departureTime: '7:30 AM',
+            arrivalTime: '8:15 AM'
+        },
+        {
+            _id: '4',
+            busName: 'Campus Bus 4',
+            busNumber: 'OD-01-AB-1004',
+            startLocation: 'College Campus',
+            destination: 'Airport',
+            stops: ['Main Gate', 'NH-16', 'Airport Road', 'Airport Terminal'],
+            departureTime: '2:00 PM',
+            arrivalTime: '3:00 PM'
+        },
+        {
+            _id: '5',
+            busName: 'Campus Bus 5',
+            busNumber: 'OD-01-AB-1005',
+            startLocation: 'College Campus',
+            destination: 'Hospital',
+            stops: ['Main Gate', 'Canteen Road', 'Main Road', 'District Hospital'],
+            departureTime: '8:00 AM',
+            arrivalTime: '8:30 AM'
+        }
+    ];
+
+    const [buses, setBuses] = useState(fallbackBuses);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -12,9 +65,14 @@ export function BusTiming({ onClose }) {
             try {
                 setLoading(true);
                 const data = await getAllBuses();
-                setBuses(data);
+                if (data && data.length > 0) {
+                    setBuses(data);
+                    setError(null);
+                }
             } catch (err) {
-                setError('Unable to fetch bus data. Make sure the backend server is running.');
+                console.warn('Backend offline, using static bus data.');
+                setError('Using static schedule while server connects.');
+                // We keep the buses state as fallbackBuses by default
             } finally {
                 setLoading(false);
             }
@@ -54,23 +112,23 @@ export function BusTiming({ onClose }) {
                     )}
 
                     {error && (
-                        <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
-                            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                        <div className="flex items-start gap-3 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                            <AlertCircle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
                             <div>
-                                <p className="text-red-700 font-semibold text-sm">Connection Error</p>
-                                <p className="text-red-600 text-xs mt-1">{error}</p>
+                                <p className="text-yellow-700 font-semibold text-sm">Offline Mode Active</p>
+                                <p className="text-yellow-600 text-xs mt-1">{error}</p>
                             </div>
                         </div>
                     )}
 
-                    {!loading && !error && buses.length === 0 && (
+                    {!loading && buses.length === 0 && (
                         <div className="text-center py-12">
                             <Bus className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                             <p className="text-gray-500 text-sm">No buses found. Add buses via POST /api/buses</p>
                         </div>
                     )}
 
-                    {!loading && !error && buses.length > 0 && (
+                    {!loading && buses.length > 0 && (
                         <>
                             <p className="text-xs text-gray-500 mb-4 font-medium">
                                 {buses.length} bus route{buses.length !== 1 ? 's' : ''} available
