@@ -9,32 +9,6 @@ export function SearchBar({ onSearch }) {
   const [error, setError] = useState(null);
   const popupRef = useRef(null);
 
-  // Fallback data for offline backend
-  const fallbackBuses = [
-    {
-      _id: '1',
-      busName: 'Campus Bus 1',
-      busNumber: 'OD-01-AB-1001',
-      startLocation: 'College Campus',
-      destination: 'City Center',
-      stops: ['Main Gate', 'Bus Stand', 'Market Square', 'City Center'],
-      departureTime: '9:00 AM',
-      arrivalTime: '9:45 AM',
-      routePath: [{ lat: 20.2961, lng: 85.8245 }]
-    },
-    {
-      _id: '2',
-      busName: 'Campus Bus 2',
-      busNumber: 'OD-01-AB-1002',
-      startLocation: 'College Campus',
-      destination: 'Railway Station',
-      stops: ['Main Gate', 'Gate 2', 'Overbridge', 'Railway Station'],
-      departureTime: '10:30 AM',
-      arrivalTime: '11:15 AM',
-      routePath: [{ lat: 20.2961, lng: 85.8245 }]
-    }
-  ];
-
   // Fetch buses when popup opens for the first time
   useEffect(() => {
     if (!open || buses.length > 0) return;
@@ -45,20 +19,16 @@ export function SearchBar({ onSearch }) {
         const data = await getAllBuses();
         if (data && data.length > 0) {
           setBuses(data);
-        } else {
-          setBuses(fallbackBuses);
         }
-      } catch {
-        // Use fallback static data silently
-        console.warn("Backend offline, using fallback bus data in SearchBar.");
-        setBuses(fallbackBuses);
-        setError('Using offline bus schedule while backend sleeps.');
+      } catch (err) {
+        console.error('Failed to fetch buses:', err);
+        setError('Unable to load bus schedules. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
     fetchBuses();
-  }, [open]);
+  }, [open, buses.length]);
 
   // Close popup when clicking outside
   useEffect(() => {
